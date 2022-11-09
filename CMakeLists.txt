@@ -8,6 +8,22 @@ find_package(rclcpp REQUIRED)
 
 find_package(ros2_unitree_legged_msgs REQUIRED)
 
+EXECUTE_PROCESS( COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE )
+if( ${ARCHITECTURE} STREQUAL "aarch64" )
+    # Jetson Setup
+    set(LEGGED_SDK_DIR "/home/unitree/Unitree/sdk/unitree_legged_sdk")
+    set( LIBRARY_NAME "libunitree_legged_sdk_arm64.so" )
+elseif( ${ARCHITECTURE} STREQUAL "x86_64" )
+    # Local Setup
+    set(LEGGED_SDK_DIR "/home/kimsooyoung/Downloads/unitree_legged_sdk_v3.5.1/unitree_legged_sdk")
+    set( LIBRARY_NAME "libunitree_legged_sdk_amd64.so" )
+else()
+    message(FATAL_ERROR "Invalid Architecture CMake Stops")
+endif()
+include_directories(${LEGGED_SDK_DIR}/include)
+link_directories(${LEGGED_SDK_DIR}/lib)
+string(CONCAT LEGGED_SDK_NAME ${LIBRARY_NAME})
+set(EXTRA_LIBS ${LEGGED_SDK_NAME} lcm)
 
 message("-- CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
 if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "x86_64.*")
